@@ -1,1 +1,7 @@
 node_modules
+*.yml
+*.sh
+*.json
+DOCKER.md
+Dockerfile
+.dockerignore

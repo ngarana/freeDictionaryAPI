@@ -5,3 +5,4 @@ node_modules
 DOCKER.md
 Dockerfile
 .dockerignore
+PR_MESSAGE.md

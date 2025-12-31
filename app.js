@@ -34,22 +34,23 @@ const { JSDOM } = require('jsdom'),
 // GLOBALS
 global._ = require('lodash');
 
-function cleanText (text) {
+function cleanText(text) {
     if (!text) { return text; }
 
-    return parser
-        .parseFromString(text, "text/html")
-        .body.textContent;
+    const doc = parser.parseFromString(text, "text/html");
+    const elementsToRemove = doc.querySelectorAll("style, script");
+    elementsToRemove.forEach(el => el.remove());
+    return doc.body.textContent;
 }
 
 
-function handleError (error = {}) {
+function handleError(error = {}) {
     // Using duck typing to know if we explicitly threw this error
     // If not then wrapping original error into UnexpectedError
     if (!error.requestType) { error = new errors.UnexpectedError({ original_error: error }); }
 
     const { requestType, title, message, resolution } = error;
-        status = REQUEST_TYPE_STATUS_CODE[requestType],
+    status = REQUEST_TYPE_STATUS_CODE[requestType],
         body = JSON.stringify({
             title,
             message,
@@ -77,7 +78,7 @@ app.get('/api/:version/entries/:language/:word', async (req, res) => {
     word = decodeURIComponent(word);
 
     if (!word || !language || !version) {
-        return handleError.call(res, new errors.NoDefinitionsFound()); 
+        return handleError.call(res, new errors.NoDefinitionsFound());
     }
 
     // @todo: Find better error.
@@ -93,7 +94,7 @@ app.get('/api/:version/entries/:language/:word', async (req, res) => {
     // @todo: Find better error.
     if (!utils.isLanguageSupported(language)) { return handleError.call(res, new errors.NoDefinitionsFound()); }
 
-    word = word.trim().toLocaleLowerCase(language);
+    word = word.trim();
 
     try {
         let definitions = await dictionary.findDefinitions(word, language, { include }),

@@ -2,12 +2,29 @@
 
 There was no free Dictionary API on the web when I wanted one for my friend, so I created one.
 
+## Data Source & License
+
+This API uses [Wiktionary](https://en.wiktionary.org/) as its data source via the Wiktionary REST API. Wiktionary is a free, collaboratively edited multilingual dictionary.
+
+### Attribution
+
+Dictionary definitions provided by this API are sourced from [Wiktionary](https://en.wiktionary.org/), a project of the [Wikimedia Foundation](https://wikimediafoundation.org/).
+
+The content from Wiktionary is available under the [Creative Commons Attribution-ShareAlike 4.0 International License (CC-BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
+
+**If you use this API, you must:**
+- Provide attribution to Wiktionary as the source of the definitions
+- Include a link to the CC-BY-SA 4.0 license
+- If you modify the content, you must distribute your contributions under the same license
+
+For individual word entries, the original contributors can be found in the page history at `https://en.wiktionary.org/wiki/<word>`.
+
 ## Important Note
 The API usage has been ramping up rapidly, making it difficult for me to keep the server running due to increased AWS costs.
 
 Your support directly helps the development of Dictionary API and keeps the server running.
 
-<a href="https://www.buymeacoffee.com/meetdeveloper"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=meetdeveloper&button_colour=5F7FFF&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"></a>
+<a href="https://www.buymeacoffee.com/meetdeveloper"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&amp;emoji=&amp;slug=meetdeveloper&amp;button_colour=5F7FFF&amp;font_colour=ffffff&amp;font_family=Poppins&amp;outline_colour=000000&amp;coffee_colour=FFDD00"></a>
 
 ## Getting Started
 
@@ -25,26 +42,18 @@ As an example, to get definition of English word **hello** using _v2_, you can s
 [
   {
     "word": "hello",
-    "phonetic": "həˈləʊ",
-    "phonetics": [
-      {
-        "text": "həˈləʊ",
-        "audio": "//ssl.gstatic.com/dictionary/static/sounds/20200429/hello--_gb_1.mp3"
-      },
-      {
-        "text": "hɛˈləʊ"
-      }
-    ],
-    "origin": "early 19th century: variant of earlier hollo ; related to holla.",
+    "phonetics": [],
     "meanings": [
       {
-        "partOfSpeech": "exclamation",
+        "partOfSpeech": "interjection",
         "definitions": [
           {
-            "definition": "used as a greeting or to begin a phone conversation.",
-            "example": "hello there, Katie!",
-            "synonyms": [],
-            "antonyms": []
+            "definition": "A greeting (salutation) said when meeting someone or acknowledging someone's arrival or presence.",
+            "example": "Hello, everyone."
+          },
+          {
+            "definition": "A greeting used when answering the telephone.",
+            "example": "Hello? How may I help you?"
           }
         ]
       },
@@ -52,10 +61,8 @@ As an example, to get definition of English word **hello** using _v2_, you can s
         "partOfSpeech": "noun",
         "definitions": [
           {
-            "definition": "an utterance of ‘hello’; a greeting.",
-            "example": "she was getting polite nods and hellos from people",
-            "synonyms": [],
-            "antonyms": []
+            "definition": "\"Hello!\" or an equivalent greeting.",
+            "example": "They gave each other a quick hello when they met, and went back on their merry ways."
           }
         ]
       },
@@ -63,10 +70,7 @@ As an example, to get definition of English word **hello** using _v2_, you can s
         "partOfSpeech": "verb",
         "definitions": [
           {
-            "definition": "say or shout ‘hello’.",
-            "example": "I pressed the phone button and helloed",
-            "synonyms": [],
-            "antonyms": []
+            "definition": "To greet with \"hello\"."
           }
         ]
       }
@@ -75,6 +79,8 @@ As an example, to get definition of English word **hello** using _v2_, you can s
 ]
 ```
 
+> **Note:** The API now uses Wiktionary as its data source. Response format remains compatible but some fields like `phonetic`, `origin`, `synonyms`, and `antonyms` may not always be present.
+
 ### Regarding V1 Version
 The API earlier used to send response as shown below, but this structure of response was found out to be difficult to work with (you can take a look at these tickets [#32](https://github.com/meetDeveloper/freeDictionaryAPI/issues/32) and [#4](https://github.com/meetDeveloper/freeDictionaryAPI/issues/4)), based on feedback in these tickets I have updated the API to _v2_ version. But _v1_ version will always be supported for backward compatibility.
 
@@ -82,40 +88,23 @@ The API earlier used to send response as shown below, but this structure of resp
 [
   {
     "word": "hello",
-    "phonetic": "həˈləʊ",
-    "phonetics": [
-      {
-        "text": "həˈləʊ",
-        "audio": "//ssl.gstatic.com/dictionary/static/sounds/20200429/hello--_gb_1.mp3"
-      },
-      {
-        "text": "hɛˈləʊ"
-      }
-    ],
-    "origin": "early 19th century: variant of earlier hollo ; related to holla.",
+    "phonetics": [],
     "meaning": {
-      "exclamation": [
+      "interjection": [
         {
-          "definition": "used as a greeting or to begin a phone conversation.",
-          "example": "hello there, Katie!",
-          "synonyms": [],
-          "antonyms": []
+          "definition": "A greeting (salutation) said when meeting someone.",
+          "example": "Hello, everyone."
         }
       ],
       "noun": [
         {
-          "definition": "an utterance of ‘hello’; a greeting.",
-          "example": "she was getting polite nods and hellos from people",
-          "synonyms": [],
-          "antonyms": []
+          "definition": "\"Hello!\" or an equivalent greeting.",
+          "example": "They gave each other a quick hello."
         }
       ],
       "verb": [
         {
-          "definition": "say or shout ‘hello’.",
-          "example": "I pressed the phone button and helloed",
-          "synonyms": [],
-          "antonyms": []
+          "definition": "To greet with \"hello\"."
         }
       ]
     }
@@ -147,7 +136,7 @@ This Dictionary API was initially created as an API that could be used by my fri
 
 Kindly help me keep running and developing this API. Thanks a lot for using my API, it feels good when your creation help other create their own projects.
 
-<a href="https://www.buymeacoffee.com/meetdeveloper"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=meetdeveloper&button_colour=5F7FFF&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00"></a>
+<a href="https://www.buymeacoffee.com/meetdeveloper"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&amp;emoji=&amp;slug=meetdeveloper&amp;button_colour=5F7FFF&amp;font_colour=ffffff&amp;font_family=Poppins&amp;outline_colour=000000&amp;coffee_colour=FFDD00"></a>
 
 ## Related Projects
 

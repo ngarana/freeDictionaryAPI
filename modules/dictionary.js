@@ -8,6 +8,10 @@ const fs = require('fs'),
 
 	httpsAgent = new https.Agent({ keepAlive: true });
 
+// Cache for Datamuse results to avoid repeated API calls
+const datamuseCache = new Map();
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
 function transformV2toV1(data) {
 	return data.map((entry) => {
 		let {
@@ -175,8 +179,52 @@ async function queryGoogle(word, language) {
 	return single_results;
 }
 
-// Wiktionary transform function
-function transformWiktionary(word, data) {
+// Datamuse API for synonyms and antonyms
+async function fetchDatamuse(word, type) {
+	const cacheKey = `${type}:${word.toLowerCase()}`;
+	const cached = datamuseCache.get(cacheKey);
+
+	if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+		return cached.data;
+	}
+
+	try {
+		const url = `https://api.datamuse.com/words?rel_${type}=${encodeURIComponent(word)}`;
+		const response = await fetch(url);
+
+		if (response.status === 200) {
+			const data = await response.json();
+			// Extract just the words, limit to top 5 by score
+			const words = data
+				.slice(0, 5)
+				.map(item => item.word);
+
+			datamuseCache.set(cacheKey, { data: words, timestamp: Date.now() });
+			return words;
+		}
+	} catch (err) {
+		console.error(`Datamuse API error for ${type} of "${word}":`, err.message);
+	}
+
+	return [];
+}
+
+async function getSynonyms(word) {
+	return fetchDatamuse(word, 'syn');
+}
+
+async function getAntonyms(word) {
+	return fetchDatamuse(word, 'ant');
+}
+
+// Wiktionary transform function - now async to fetch synonyms/antonyms
+async function transformWiktionary(word, data) {
+	// Fetch synonyms and antonyms from Datamuse
+	const [synonyms, antonyms] = await Promise.all([
+		getSynonyms(word),
+		getAntonyms(word)
+	]);
+
 	return [{
 		word: word,
 		phonetic: '',
@@ -184,11 +232,12 @@ function transformWiktionary(word, data) {
 		origin: '',
 		meanings: data.map(entry => ({
 			partOfSpeech: entry.partOfSpeech.toLowerCase(),
-			definitions: entry.definitions.map(def => ({
+			definitions: entry.definitions.map((def, index) => ({
 				definition: def.definition,
-				example: def.examples && def.examples.length > 0 ? def.examples[0] : undefined,
-				synonyms: [],
-				antonyms: []
+				example: def.examples && def.examples.length > 0 ? def.examples[0] : '',
+				// Only add synonyms/antonyms to first definition to avoid repetition
+				synonyms: index === 0 ? synonyms : [],
+				antonyms: index === 0 ? antonyms : []
 			}))
 		}))
 	}];
@@ -216,7 +265,6 @@ async function queryWiktionary(word, language) {
 				}
 			}
 		} catch (err) {
-			// Ignore errors and try next candidate
 			console.error(`Wiktionary: Failed to fetch for candidate: ${candidate}`, err.message);
 		}
 	}
@@ -225,7 +273,7 @@ async function queryWiktionary(word, language) {
 }
 
 async function findDefinitions(word, language, { include }) {
-	// Strategy: Try Google first (has richer data), fallback to Wiktionary if Google fails
+	// Strategy: Try Google first (has richer data), fallback to Wiktionary + Datamuse if Google fails
 
 	// Try Google first
 	try {
@@ -235,15 +283,15 @@ async function findDefinitions(word, language, { include }) {
 			return transformGoogle(word, language, googleData, { include });
 		}
 	} catch (googleError) {
-		console.log(`Google failed for "${word}": ${googleError.message}, trying Wiktionary...`);
+		console.log(`Google failed for "${word}": ${googleError.message}, trying Wiktionary + Datamuse...`);
 	}
 
-	// Fallback to Wiktionary
+	// Fallback to Wiktionary + Datamuse for synonyms/antonyms
 	const wiktionaryResult = await queryWiktionary(word, language);
 
 	if (wiktionaryResult) {
-		console.log(`Using Wiktionary data for: ${word}`);
-		return transformWiktionary(wiktionaryResult.word, wiktionaryResult.data);
+		console.log(`Using Wiktionary + Datamuse data for: ${word}`);
+		return await transformWiktionary(wiktionaryResult.word, wiktionaryResult.data);
 	}
 
 	// Both sources failed

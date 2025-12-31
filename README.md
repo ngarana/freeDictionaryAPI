@@ -4,13 +4,18 @@ There was no free Dictionary API on the web when I wanted one for my friend, so 
 
 ## Data Source & License
 
-This API uses [Wiktionary](https://en.wiktionary.org/) as its data source via the Wiktionary REST API. Wiktionary is a free, collaboratively edited multilingual dictionary.
+This API uses multiple data sources:
+
+- **[Wiktionary](https://en.wiktionary.org/)** — Dictionary definitions via the Wiktionary REST API
+- **[Datamuse](https://www.datamuse.com/api/)** — Synonyms and antonyms (free API, no key required)
 
 ### Attribution
 
 Dictionary definitions provided by this API are sourced from [Wiktionary](https://en.wiktionary.org/), a project of the [Wikimedia Foundation](https://wikimediafoundation.org/).
 
 The content from Wiktionary is available under the [Creative Commons Attribution-ShareAlike 4.0 International License (CC-BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
+
+Synonyms and antonyms are provided by the [Datamuse API](https://www.datamuse.com/api/), which is free to use.
 
 **If you use this API, you must:**
 - Provide attribution to Wiktionary as the source of the definitions
